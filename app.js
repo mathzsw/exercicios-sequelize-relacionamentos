@@ -6,6 +6,10 @@ const Passaporte = require('./models/Passaporte');
 const Autor = require('./models/Autor');
 const Livro = require('./models/Livro');
 const Categoria = require('./models/Categoria');
+const Criador = require('./models/Criador');
+const PerfilCriador = require('./models/PerfilCriador');
+const Video = require('./models/Video');
+const Hashtag = require('./models/Hashtag');
 
 require('./models/relacionamentosModels');
 
@@ -125,9 +129,7 @@ app.post('/livros/cadastrar', async (req, res) => {
       : [req.body.categorias];
 
     const autor = await Autor.findByPk(autorId);
-    const categorias = await Categoria.findAll({
-      where: { id: categoriaIds }
-    });
+    const categorias = await Categoria.findAll({ where: { id: categoriaIds } });
 
     if (!autor || categorias.length === 0) {
       return res.status(400).send('Autor ou categoria inválidos.');
@@ -140,7 +142,6 @@ app.post('/livros/cadastrar', async (req, res) => {
     });
 
     await livro.setCategorias(categorias);
-
     res.redirect(`/livros/${livro.id}`);
   } catch (erro) {
     console.error(erro);
@@ -162,12 +163,131 @@ app.get('/livros/:id', async (req, res) => {
       return res.status(404).send('Livro não encontrado.');
     }
 
-    res.render('detalharLivro', {
-      livro: livro.toJSON()
-    });
+    res.render('detalharLivro', { livro: livro.toJSON() });
   } catch (erro) {
     console.error(erro);
     res.status(500).send('Erro ao detalhar Livro.');
+  }
+});
+
+// Exercício 12 - cria dados de exemplo do mini-TikTok
+app.get('/tiktok/exemplo', async (req, res) => {
+  try {
+    const criador = await Criador.create({
+      nome: 'Matheus Augusto',
+      nomeUsuario: '@matheus',
+      seguidores: 1000
+    });
+
+    await criador.createPerfil({
+      bio: 'Criador de conteúdo sobre tecnologia.',
+      fotoUrl: 'https://example.com/foto.jpg',
+      linkRedeSocial: 'https://instagram.com/matheus'
+    });
+
+    const hashtagTecnologia = await Hashtag.create({ nome: 'tecnologia' });
+    const hashtagProgramacao = await Hashtag.create({ nome: 'programacao' });
+
+    const video = await Video.create({
+      titulo: 'Meu primeiro vídeo',
+      descricao: 'Aprendendo Sequelize.',
+      videoUrl: 'https://example.com/video.mp4',
+      criadorId: criador.id
+    });
+
+    await video.setHashtags([hashtagTecnologia, hashtagProgramacao]);
+
+    res.send(`Dados criados. Veja o criador em /tiktok/criadores/${criador.id} e o vídeo em /tiktok/videos/${video.id}`);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao criar dados do mini-TikTok.');
+  }
+});
+
+// Exercício 12 - formulário de cadastro de vídeo
+app.get('/tiktok/videos/cadastrar', async (req, res) => {
+  try {
+    const criadores = await Criador.findAll({ order: [['nome', 'ASC']] });
+    const hashtags = await Hashtag.findAll({ order: [['nome', 'ASC']] });
+
+    res.render('cadastrarVideo', {
+      criadores: criadores.map((criador) => criador.toJSON()),
+      hashtags: hashtags.map((hashtag) => hashtag.toJSON())
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao carregar formulário de vídeo.');
+  }
+});
+
+app.post('/tiktok/videos/cadastrar', async (req, res) => {
+  try {
+    const { titulo, descricao, videoUrl, criadorId } = req.body;
+    const hashtagIds = Array.isArray(req.body.hashtags)
+      ? req.body.hashtags
+      : [req.body.hashtags];
+
+    const criador = await Criador.findByPk(criadorId);
+    const hashtags = await Hashtag.findAll({ where: { id: hashtagIds } });
+
+    if (!criador || hashtags.length === 0) {
+      return res.status(400).send('Criador ou hashtag inválidos.');
+    }
+
+    const video = await Video.create({
+      titulo,
+      descricao,
+      videoUrl,
+      criadorId: criador.id
+    });
+
+    await video.setHashtags(hashtags);
+    res.redirect(`/tiktok/videos/${video.id}`);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao cadastrar vídeo.');
+  }
+});
+
+// Exercício 12 - detalhe do vídeo com criador e hashtags
+app.get('/tiktok/videos/:id', async (req, res) => {
+  try {
+    const video = await Video.findByPk(req.params.id, {
+      include: [
+        { model: Criador, as: 'criador' },
+        { model: Hashtag, as: 'hashtags' }
+      ]
+    });
+
+    if (!video) {
+      return res.status(404).send('Vídeo não encontrado.');
+    }
+
+    res.render('detalharVideo', { video: video.toJSON() });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao detalhar vídeo.');
+  }
+});
+
+// Exercício 12 - detalhe do criador com perfil e vídeos
+app.get('/tiktok/criadores/:id', async (req, res) => {
+  try {
+    const criador = await Criador.findByPk(req.params.id, {
+      include: [
+        { model: PerfilCriador, as: 'perfil' },
+        { model: Video, as: 'videos' }
+      ]
+    });
+
+    if (!criador) {
+      return res.status(404).send('Criador não encontrado.');
+    }
+
+    res.render('detalharCriador', { criador: criador.toJSON() });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao detalhar criador.');
   }
 });
 
