@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>{{criador.nome}}</title>
+</head>
+<body>
+  <h1>{{criador.nome}}</h1>
+  <p><strong>Usuário:</strong> {{criador.nomeUsuario}}</p>
+  <p><strong>Seguidores:</strong> {{criador.seguidores}}</p>
+
+  <h2>Perfil</h2>
+  {{#if criador.perfil}}
+    <p><strong>Bio:</strong> {{criador.perfil.bio}}</p>
+    <p>
+      <strong>Foto:</strong>
+      <img src="{{criador.perfil.fotoUrl}}" alt="Foto de {{criador.nome}}" width="150">
+    </p>
+    <p>
+      <strong>Rede social:</strong>
+      <a href="{{criador.perfil.linkRedeSocial}}" target="_blank">Acessar perfil</a>
+    </p>
+  {{else}}
+    <p>Este criador ainda não possui perfil.</p>
+  {{/if}}
+
+  <h2>Vídeos publicados</h2>
+  <ul>
+    {{#each criador.videos}}
+      <li>
+        <a href="/tiktok/videos/{{id}}">{{titulo}}</a>
+      </li>
+    {{else}}
+      <li>Nenhum vídeo publicado.</li>
+    {{/each}}
+  </ul>
+
+  <a href="/tiktok/videos/cadastrar">Cadastrar vídeo</a>
+</body>
+</html>
