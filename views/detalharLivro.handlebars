@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>{{livro.titulo}}</title>
+</head>
+<body>
+  <h1>{{livro.titulo}}</h1>
+
+  <p><strong>Ano de publicação:</strong> {{livro.anoPublicacao}}</p>
+
+  <p>
+    <strong>Autor:</strong>
+    {{livro.autor.nome}}
+  </p>
+
+  <h2>Categorias</h2>
+  <ul>
+    {{#each livro.categorias}}
+      <li>{{nome}}</li>
+    {{/each}}
+  </ul>
+
+  <a href="/livros/cadastrar">Cadastrar outro livro</a>
+</body>
+</html>
