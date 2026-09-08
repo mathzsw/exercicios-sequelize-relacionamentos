@@ -2,6 +2,7 @@ const Pessoa = require('./Pessoa');
 const Passaporte = require('./Passaporte');
 const Autor = require('./Autor');
 const Livro = require('./Livro');
+const Categoria = require('./Categoria');
 
 Pessoa.hasOne(Passaporte, {
   foreignKey: 'pessoaId',
@@ -21,4 +22,16 @@ Autor.hasMany(Livro, {
 Livro.belongsTo(Autor, {
   foreignKey: 'autorId',
   as: 'autor'
+});
+
+Livro.belongsToMany(Categoria, {
+  through: 'LivroCategoria',
+  foreignKey: 'livroId',
+  as: 'categorias'
+});
+
+Categoria.belongsToMany(Livro, {
+  through: 'LivroCategoria',
+  foreignKey: 'categoriaId',
+  as: 'livros'
 });
