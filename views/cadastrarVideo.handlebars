@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastrar Vídeo</title>
+</head>
+<body>
+  <h1>Cadastrar Vídeo</h1>
+
+  <form action="/tiktok/videos/cadastrar" method="POST">
+    <div>
+      <label for="titulo">Título:</label>
+      <input type="text" id="titulo" name="titulo" required>
+    </div>
+
+    <div>
+      <label for="descricao">Descrição:</label>
+      <input type="text" id="descricao" name="descricao" required>
+    </div>
+
+    <div>
+      <label for="videoUrl">URL do vídeo:</label>
+      <input type="url" id="videoUrl" name="videoUrl" required>
+    </div>
+
+    <div>
+      <label for="criadorId">Criador:</label>
+      <select id="criadorId" name="criadorId" required>
+        <option value="">Selecione um criador</option>
+        {{#each criadores}}
+          <option value="{{id}}">{{nome}} ({{nomeUsuario}})</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div>
+      <label for="hashtags">Hashtags:</label>
+      <select id="hashtags" name="hashtags" multiple required>
+        {{#each hashtags}}
+          <option value="{{id}}">#{{nome}}</option>
+        {{/each}}
+      </select>
+      <p>Use Ctrl + clique para selecionar mais de uma hashtag.</p>
+    </div>
+
+    <button type="submit">Cadastrar Vídeo</button>
+  </form>
+</body>
+</html>
