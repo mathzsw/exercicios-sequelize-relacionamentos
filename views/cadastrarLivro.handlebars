@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastrar Livro</title>
+</head>
+<body>
+  <h1>Cadastrar Livro</h1>
+
+  <form action="/livros/cadastrar" method="POST">
+    <div>
+      <label for="titulo">Título:</label>
+      <input type="text" id="titulo" name="titulo" required>
+    </div>
+
+    <div>
+      <label for="anoPublicacao">Ano de publicação:</label>
+      <input type="number" id="anoPublicacao" name="anoPublicacao" required>
+    </div>
+
+    <div>
+      <label for="autorId">Autor:</label>
+      <select id="autorId" name="autorId" required>
+        <option value="">Selecione um autor</option>
+        {{#each autores}}
+          <option value="{{id}}">{{nome}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div>
+      <label for="categorias">Categorias:</label>
+      <select id="categorias" name="categorias" multiple required>
+        {{#each categorias}}
+          <option value="{{id}}">{{nome}}</option>
+        {{/each}}
+      </select>
+      <p>Use Ctrl + clique para selecionar mais de uma categoria.</p>
+    </div>
+
+    <button type="submit">Cadastrar Livro</button>
+  </form>
+</body>
+</html>
