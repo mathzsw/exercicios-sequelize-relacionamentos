@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>{{video.titulo}}</title>
+</head>
+<body>
+  <h1>{{video.titulo}}</h1>
+
+  <p><strong>Descrição:</strong> {{video.descricao}}</p>
+  <p><strong>Vídeo:</strong> <a href="{{video.videoUrl}}" target="_blank">Assistir vídeo</a></p>
+
+  <p>
+    <strong>Criador:</strong>
+    <a href="/tiktok/criadores/{{video.criador.id}}">{{video.criador.nome}}</a>
+    ({{video.criador.nomeUsuario}})
+  </p>
+
+  <h2>Hashtags</h2>
+  <ul>
+    {{#each video.hashtags}}
+      <li>#{{nome}}</li>
+    {{/each}}
+  </ul>
+
+  <a href="/tiktok/videos/cadastrar">Cadastrar outro vídeo</a>
+</body>
+</html>
