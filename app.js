@@ -2,18 +2,18 @@ const express = require('express');
 const sequelize = require('./db');
 const Pessoa = require('./models/Pessoa');
 const Passaporte = require('./models/Passaporte');
+const Autor = require('./models/Autor');
+const Livro = require('./models/Livro');
 
 require('./models/relacionamentosModels');
 
 const app = express();
 const PORT = 3000;
 
-// Exercício 2 - cria uma Pessoa e seu Passaporte usando o método mágico
+// Exercício 2
 app.get('/exercicio2', async (req, res) => {
   try {
-    const pessoa = await Pessoa.create({
-      nome: 'Matheus'
-    });
+    const pessoa = await Pessoa.create({ nome: 'Matheus' });
 
     await pessoa.createPassaporte({
       numero: 'BR123456',
@@ -27,7 +27,7 @@ app.get('/exercicio2', async (req, res) => {
   }
 });
 
-// Exercício 3 - busca uma Pessoa pelo ID trazendo seu Passaporte
+// Exercício 3
 app.get('/exercicio3', async (req, res) => {
   try {
     const pessoa = await Pessoa.findByPk(1, {
@@ -42,6 +42,46 @@ app.get('/exercicio3', async (req, res) => {
   } catch (erro) {
     console.error(erro);
     res.status(500).send('Erro ao consultar Pessoa.');
+  }
+});
+
+// Exercício 5
+app.get('/exercicio5', async (req, res) => {
+  try {
+    const autor = await Autor.create({ nome: 'Machado de Assis' });
+
+    await autor.createLivro({
+      titulo: 'Dom Casmurro',
+      anoPublicacao: 1899
+    });
+
+    await autor.createLivro({
+      titulo: 'Memórias Póstumas de Brás Cubas',
+      anoPublicacao: 1881
+    });
+
+    res.send('Autor e livros criados com sucesso!');
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao criar Autor e Livros.');
+  }
+});
+
+// Exercício 6
+app.get('/exercicio6', async (req, res) => {
+  try {
+    const autor = await Autor.findByPk(1, {
+      include: {
+        model: Livro,
+        as: 'livros'
+      }
+    });
+
+    console.log(autor ? autor.toJSON() : 'Autor não encontrado.');
+    res.send('Consulta realizada. Veja o terminal.');
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao consultar Autor.');
   }
 });
 
