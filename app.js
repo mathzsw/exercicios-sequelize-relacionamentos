@@ -1,4 +1,5 @@
 const express = require('express');
+const { engine } = require('express-handlebars');
 const sequelize = require('./db');
 const Pessoa = require('./models/Pessoa');
 const Passaporte = require('./models/Passaporte');
@@ -10,6 +11,11 @@ require('./models/relacionamentosModels');
 
 const app = express();
 const PORT = 3000;
+
+app.engine('handlebars', engine());
+app.set('view engine', 'handlebars');
+app.set('views', './views');
+app.use(express.urlencoded({ extended: true }));
 
 // Exercício 2
 app.get('/exercicio2', async (req, res) => {
@@ -69,10 +75,10 @@ app.get('/exercicio8', async (req, res) => {
   try {
     const livro = await Livro.create({ titulo: 'O Alienista', anoPublicacao: 1882 });
 
-    const tecnologia = await Categoria.create({ nome: 'Literatura' });
-    const ficcao = await Categoria.create({ nome: 'Clássico' });
+    const literatura = await Categoria.create({ nome: 'Literatura' });
+    const classico = await Categoria.create({ nome: 'Clássico' });
 
-    await livro.setCategorias([tecnologia, ficcao]);
+    await livro.setCategorias([literatura, classico]);
 
     res.send('Livro e categorias associados com sucesso!');
   } catch (erro) {
@@ -92,6 +98,76 @@ app.get('/exercicio9', async (req, res) => {
   } catch (erro) {
     console.error(erro);
     res.status(500).send('Erro ao consultar Livro.');
+  }
+});
+
+// Exercício 10 - formulário de cadastro de Livro
+app.get('/livros/cadastrar', async (req, res) => {
+  try {
+    const autores = await Autor.findAll({ order: [['nome', 'ASC']] });
+    const categorias = await Categoria.findAll({ order: [['nome', 'ASC']] });
+
+    res.render('cadastrarLivro', {
+      autores: autores.map((autor) => autor.toJSON()),
+      categorias: categorias.map((categoria) => categoria.toJSON())
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao carregar formulário.');
+  }
+});
+
+app.post('/livros/cadastrar', async (req, res) => {
+  try {
+    const { titulo, anoPublicacao, autorId } = req.body;
+    const categoriaIds = Array.isArray(req.body.categorias)
+      ? req.body.categorias
+      : [req.body.categorias];
+
+    const autor = await Autor.findByPk(autorId);
+    const categorias = await Categoria.findAll({
+      where: { id: categoriaIds }
+    });
+
+    if (!autor || categorias.length === 0) {
+      return res.status(400).send('Autor ou categoria inválidos.');
+    }
+
+    const livro = await Livro.create({
+      titulo,
+      anoPublicacao,
+      autorId: autor.id
+    });
+
+    await livro.setCategorias(categorias);
+
+    res.redirect(`/livros/${livro.id}`);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao cadastrar Livro.');
+  }
+});
+
+// Exercício 11 - detalhamento do Livro
+app.get('/livros/:id', async (req, res) => {
+  try {
+    const livro = await Livro.findByPk(req.params.id, {
+      include: [
+        { model: Autor, as: 'autor' },
+        { model: Categoria, as: 'categorias' }
+      ]
+    });
+
+    if (!livro) {
+      return res.status(404).send('Livro não encontrado.');
+    }
+
+    res.render('detalharLivro', {
+      livro: livro.toJSON()
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).send('Erro ao detalhar Livro.');
   }
 });
 
